@@ -1,9 +1,7 @@
-Chamberlain MyQ Plugin
+Chamberlain MyQ SDK
 ======================
 
-The in app purchase system provided by Google is missing one very important thing. 
-
-This tool will allow app developers to provide their users with codes to be redeemed in app for extra content.
+This is a simple Java wrapper around all the api calls used to login, and retreive and set device attributes.
 
 Building and Including
 -----
