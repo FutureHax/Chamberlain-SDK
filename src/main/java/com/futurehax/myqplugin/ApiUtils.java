@@ -93,8 +93,6 @@ public class ApiUtils {
     }
 
     public void loginUser(final String email, final String password, final FutureCallback<SecretToken> callback) {
-
-
         Ion.with(ctx)
                 .load(generateURL(ApiConstants.LOGIN_REQUEST, email, password))
                 .asJsonObject().setCallback(new FutureCallback<JsonObject>() {
@@ -110,8 +108,8 @@ public class ApiUtils {
                         token = new SecretToken(res.get("SecurityToken").getAsString(), System.currentTimeMillis());
                         loginUtils.setLoginInfo(token, email, password);
                     }
-                    callback.onCompleted(ex, token);
                 }
+                callback.onCompleted(ex, token);
             }
         });
     }
@@ -154,10 +152,8 @@ public class ApiUtils {
                 public void onCompleted(Exception e, SecretToken result) {
                     if (e == null) {
                         loginUtils.setLoginInfo(result, loginUtils.getEmail(), loginUtils.getPassword());
-                        cb.onCompleted(e, result);
-                    } else {
-                        cb.onCompleted(e, null);
                     }
+                    cb.onCompleted(e, result);
                 }
             });
         } else {
@@ -181,7 +177,7 @@ public class ApiUtils {
 
     public void setDeviceAttribute(String deviceId,
                                    String attributeName, Object attributeValue,
-                                   final FutureCallback<String> callback) {
+                                   final FutureCallback<JsonObject> callback) {
         final JsonObject json = new JsonObject();
         json.addProperty(ApiConstants.ATTRIBUTE_NAME_PARAM_FIELD, attributeName);
         json.addProperty(ApiConstants.DEVICE_ID_PARAM_FIELD, deviceId);
@@ -192,15 +188,16 @@ public class ApiUtils {
             json.addProperty(ApiConstants.ATTRIBUTE_VALUE_PARAM_FIELD, (Number) attributeValue);
         }
         json.addProperty(ApiConstants.SECURITY_TOKEN_PARAM_FIELD, loginUtils.getToken().getKey());
-        Log.d("THE PAYLOAD", json.toString());
+
         if (ready) {
             Ion.with(ctx).load("PUT", generateURL(ApiConstants.SET_DEVICE_REQUEST))
                     .setHeader(ApiConstants.CONTENT_TYPE_PARAM_FIELD, "application/json")
                     .setJsonObjectBody(json)
-                    .asString().setCallback((callback == null) ? new FutureCallback<String>() {
+                    .asJsonObject().setCallback((callback == null) ? new FutureCallback<JsonObject>() {
                 @Override
-                public void onCompleted(Exception e, String result) {
-                    Toast.makeText(ctx, result.toString(), Toast.LENGTH_LONG).show();
+                public void onCompleted(Exception e, JsonObject result) {
+                    String error = result.get("ErrorMessage").getAsString().trim();
+                    Toast.makeText(ctx, error.isEmpty() ? "MyQ task success." : error, Toast.LENGTH_LONG).show();
                 }
             } : callback);
         } else {
